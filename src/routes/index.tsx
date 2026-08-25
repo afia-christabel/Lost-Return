@@ -20,6 +20,8 @@ export const Route = createFileRoute("/")({
         content:
           "Verified campus lost and found: smart matching, private ownership verification, and safe handovers.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Home,
