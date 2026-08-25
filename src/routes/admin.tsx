@@ -26,6 +26,8 @@ export const Route = createFileRoute("/admin")({
         property: "og:description",
         content: "Queue of pending reports, claims under verification and scheduled handovers.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Admin,

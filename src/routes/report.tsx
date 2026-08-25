@@ -30,6 +30,8 @@ export const Route = createFileRoute("/report")({
         property: "og:description",
         content: "A guided report flow that keeps identifying details private for verification.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Report,

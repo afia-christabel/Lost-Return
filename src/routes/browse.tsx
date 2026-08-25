@@ -28,6 +28,8 @@ export const Route = createFileRoute("/browse")({
         property: "og:description",
         content: "Filter campus lost and found reports by type, category and location.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Browse,
