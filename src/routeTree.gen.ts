@@ -13,8 +13,12 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as BrowseRouteImport } from './routes/browse'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as FaqRouteImport } from './routes/faq'
+import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as ReportRouteImport } from './routes/report'
+import { Route as SafetyGuidelinesRouteImport } from './routes/safety-guidelines'
 import { Route as ItemsItemIdRouteImport } from './routes/items.$itemId'
 import { Route as ItemsItemIdIndexRouteImport } from './routes/items.$itemId.index'
 import { Route as ItemsItemIdClaimRouteImport } from './routes/items.$itemId.claim'
@@ -39,14 +43,34 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HowItWorksRoute = HowItWorksRouteImport.update({
+  id: '/how-it-works',
+  path: '/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NotificationsRoute = NotificationsRouteImport.update({
   id: '/notifications',
   path: '/notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
+  id: '/privacy-policy',
+  path: '/privacy-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReportRoute = ReportRouteImport.update({
   id: '/report',
   path: '/report',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SafetyGuidelinesRoute = SafetyGuidelinesRouteImport.update({
+  id: '/safety-guidelines',
+  path: '/safety-guidelines',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ItemsItemIdRoute = ItemsItemIdRouteImport.update({
@@ -70,8 +94,12 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/browse': typeof BrowseRoute
   '/dashboard': typeof DashboardRoute
+  '/faq': typeof FaqRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/notifications': typeof NotificationsRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
   '/report': typeof ReportRoute
+  '/safety-guidelines': typeof SafetyGuidelinesRoute
   '/items/$itemId': typeof ItemsItemIdRouteWithChildren
   '/items/$itemId/claim': typeof ItemsItemIdClaimRoute
   '/items/$itemId/': typeof ItemsItemIdIndexRoute
@@ -81,8 +109,12 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/browse': typeof BrowseRoute
   '/dashboard': typeof DashboardRoute
+  '/faq': typeof FaqRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/notifications': typeof NotificationsRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
   '/report': typeof ReportRoute
+  '/safety-guidelines': typeof SafetyGuidelinesRoute
   '/items/$itemId/claim': typeof ItemsItemIdClaimRoute
   '/items/$itemId': typeof ItemsItemIdIndexRoute
 }
@@ -92,8 +124,12 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/browse': typeof BrowseRoute
   '/dashboard': typeof DashboardRoute
+  '/faq': typeof FaqRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/notifications': typeof NotificationsRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
   '/report': typeof ReportRoute
+  '/safety-guidelines': typeof SafetyGuidelinesRoute
   '/items/$itemId': typeof ItemsItemIdRouteWithChildren
   '/items/$itemId/claim': typeof ItemsItemIdClaimRoute
   '/items/$itemId/': typeof ItemsItemIdIndexRoute
@@ -105,8 +141,12 @@ export interface FileRouteTypes {
     | '/admin'
     | '/browse'
     | '/dashboard'
+    | '/faq'
+    | '/how-it-works'
     | '/notifications'
+    | '/privacy-policy'
     | '/report'
+    | '/safety-guidelines'
     | '/items/$itemId'
     | '/items/$itemId/claim'
     | '/items/$itemId/'
@@ -116,8 +156,12 @@ export interface FileRouteTypes {
     | '/admin'
     | '/browse'
     | '/dashboard'
+    | '/faq'
+    | '/how-it-works'
     | '/notifications'
+    | '/privacy-policy'
     | '/report'
+    | '/safety-guidelines'
     | '/items/$itemId/claim'
     | '/items/$itemId'
   id:
@@ -126,8 +170,12 @@ export interface FileRouteTypes {
     | '/admin'
     | '/browse'
     | '/dashboard'
+    | '/faq'
+    | '/how-it-works'
     | '/notifications'
+    | '/privacy-policy'
     | '/report'
+    | '/safety-guidelines'
     | '/items/$itemId'
     | '/items/$itemId/claim'
     | '/items/$itemId/'
@@ -138,8 +186,12 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   BrowseRoute: typeof BrowseRoute
   DashboardRoute: typeof DashboardRoute
+  FaqRoute: typeof FaqRoute
+  HowItWorksRoute: typeof HowItWorksRoute
   NotificationsRoute: typeof NotificationsRoute
+  PrivacyPolicyRoute: typeof PrivacyPolicyRoute
   ReportRoute: typeof ReportRoute
+  SafetyGuidelinesRoute: typeof SafetyGuidelinesRoute
   ItemsItemIdRoute: typeof ItemsItemIdRouteWithChildren
 }
 
@@ -173,6 +225,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how-it-works': {
+      id: '/how-it-works'
+      path: '/how-it-works'
+      fullPath: '/how-it-works'
+      preLoaderRoute: typeof HowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/notifications': {
       id: '/notifications'
       path: '/notifications'
@@ -180,11 +246,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy-policy': {
+      id: '/privacy-policy'
+      path: '/privacy-policy'
+      fullPath: '/privacy-policy'
+      preLoaderRoute: typeof PrivacyPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/report': {
       id: '/report'
       path: '/report'
       fullPath: '/report'
       preLoaderRoute: typeof ReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/safety-guidelines': {
+      id: '/safety-guidelines'
+      path: '/safety-guidelines'
+      fullPath: '/safety-guidelines'
+      preLoaderRoute: typeof SafetyGuidelinesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/items/$itemId': {
@@ -230,8 +310,12 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   BrowseRoute: BrowseRoute,
   DashboardRoute: DashboardRoute,
+  FaqRoute: FaqRoute,
+  HowItWorksRoute: HowItWorksRoute,
   NotificationsRoute: NotificationsRoute,
+  PrivacyPolicyRoute: PrivacyPolicyRoute,
   ReportRoute: ReportRoute,
+  SafetyGuidelinesRoute: SafetyGuidelinesRoute,
   ItemsItemIdRoute: ItemsItemIdRouteWithChildren,
 }
 export const routeTree = rootRouteImport

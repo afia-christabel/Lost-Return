@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Lock, Check } from "lucide-react";
 import { toast } from "sonner";
@@ -14,7 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { categories, locations } from "@/data/mock";
+import { categories, locations, type MockItem } from "@/data/mock";
+import { supabaseService } from "@/services/supabaseService";
 
 export const Route = createFileRoute("/report")({
   head: () => ({
@@ -40,8 +41,48 @@ export const Route = createFileRoute("/report")({
 const stepTitles = ["Type", "Item details", "Where & when", "Private details", "Review"];
 
 function Report() {
+  const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [type, setType] = useState<"lost" | "found">("lost");
+  const [name, setName] = useState("");
+  const [category, setCategory] = useState("Electronics");
+  const [colour, setColour] = useState("");
+  const [brand, setBrand] = useState("");
+  const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("Balme Library");
+  const [date, setDate] = useState(new Date().toISOString().substring(0, 10));
+  const [privateDetails, setPrivateDetails] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    try {
+      const reportPayload: Omit<MockItem, "id" | "reference" | "status"> = {
+        type,
+        name: name || `${type === "lost" ? "Lost" : "Found"} Item`,
+        category,
+        description: description || "No public description provided.",
+        location,
+        date: date || new Date().toISOString().substring(0, 10),
+        reporter: "Verified Student",
+        reporterStudentId: "10982341",
+      };
+
+      if (brand.trim()) reportPayload.brand = brand.trim();
+      if (colour.trim()) reportPayload.colour = colour.trim();
+      if (privateDetails.trim()) reportPayload.privateDetails = privateDetails.trim();
+
+      await supabaseService.createItem(reportPayload);
+
+      toast.success("Report submitted successfully!");
+      navigate({ to: "/browse" });
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to submit report. Please check details and try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <AppShell>
@@ -88,11 +129,15 @@ function Report() {
           {step === 1 && (
             <>
               <Field label="Item name">
-                <Input placeholder="e.g. Black student ID card" />
+                <Input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Black student ID card"
+                />
               </Field>
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Category">
-                  <Select>
+                  <Select value={category} onValueChange={setCategory}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
@@ -106,15 +151,25 @@ function Report() {
                   </Select>
                 </Field>
                 <Field label="Colour">
-                  <Input placeholder="e.g. Navy blue" />
+                  <Input
+                    value={colour}
+                    onChange={(e) => setColour(e.target.value)}
+                    placeholder="e.g. Navy blue"
+                  />
                 </Field>
               </div>
               <Field label="Brand or model (optional)">
-                <Input placeholder="e.g. Samsung Galaxy A34" />
+                <Input
+                  value={brand}
+                  onChange={(e) => setBrand(e.target.value)}
+                  placeholder="e.g. Samsung Galaxy A34"
+                />
               </Field>
               <Field label="Public description">
                 <Textarea
                   rows={4}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
                   placeholder="Describe the item generally. Do NOT include unique marks or serial numbers here."
                 />
               </Field>
@@ -124,7 +179,7 @@ function Report() {
           {step === 2 && (
             <>
               <Field label={type === "lost" ? "Where did you lose it?" : "Where did you find it?"}>
-                <Select>
+                <Select value={location} onValueChange={setLocation}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a campus location" />
                   </SelectTrigger>
@@ -137,15 +192,13 @@ function Report() {
                   </SelectContent>
                 </Select>
               </Field>
-              <Field label="Specific area (kept private)">
-                <Input placeholder="e.g. Second floor reading room" />
-              </Field>
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Date">
-                  <Input type="date" />
-                </Field>
-                <Field label="Approximate time">
-                  <Input placeholder="e.g. between 14:00 and 16:00" />
+                  <Input
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                  />
                 </Field>
               </div>
             </>
@@ -165,11 +218,10 @@ function Report() {
               <Field label="Unique identifying details">
                 <Textarea
                   rows={5}
+                  value={privateDetails}
+                  onChange={(e) => setPrivateDetails(e.target.value)}
                   placeholder="Scratches, cracks, stickers, serial number / IMEI, contents, engravings…"
                 />
-              </Field>
-              <Field label="Photos (optional)">
-                <Input type="file" multiple accept="image/*" />
               </Field>
             </>
           )}
@@ -194,13 +246,21 @@ function Report() {
             </Button>
           )}
           <Button
-            className="flex-1"
+            className="flex-1 bg-ug-navy text-white hover:bg-ug-navy-light"
+            disabled={submitting}
             onClick={() => {
-              if (step < stepTitles.length - 1) setStep(step + 1);
-              else toast.success("Report submitted for review");
+              if (step < stepTitles.length - 1) {
+                setStep(step + 1);
+              } else {
+                handleSubmit();
+              }
             }}
           >
-            {step < stepTitles.length - 1 ? "Continue" : "Submit report"}
+            {step < stepTitles.length - 1
+              ? "Continue"
+              : submitting
+              ? "Submitting..."
+              : "Submit report"}
           </Button>
         </div>
       </div>

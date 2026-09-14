@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Bell, Sparkles, ShieldCheck, Handshake, Megaphone } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
-import { notifications, type NotificationRecord } from "@/data/mock";
+import type { NotificationRecord } from "@/data/mock";
+import { supabaseService } from "@/services/supabaseService";
 
 export const Route = createFileRoute("/notifications")({
   head: () => ({
@@ -32,6 +34,12 @@ const icons: Record<NotificationRecord["kind"], typeof Bell> = {
 };
 
 function Notifications() {
+  const [list, setList] = useState<NotificationRecord[]>([]);
+
+  useEffect(() => {
+    supabaseService.getNotifications().then(setList);
+  }, []);
+
   return (
     <AppShell>
       <div className="mx-auto max-w-3xl px-4 py-8">
@@ -43,24 +51,28 @@ function Notifications() {
         </p>
 
         <div className="mt-6 divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
-          {notifications.map((n) => {
-            const Icon = icons[n.kind];
-            return (
-              <div key={n.id} className={`flex gap-3 p-4 ${n.unread ? "bg-accent/30" : ""}`}>
-                <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted">
-                  <Icon className="h-4 w-4 text-muted-foreground" />
-                </span>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-foreground">{n.title}</p>
-                  <p className="mt-0.5 text-sm text-muted-foreground">{n.body}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">{n.time}</p>
+          {list.length === 0 ? (
+            <p className="p-6 text-center text-xs text-muted-foreground">No notifications found.</p>
+          ) : (
+            list.map((n) => {
+              const Icon = icons[n.kind] || Bell;
+              return (
+                <div key={n.id} className={`flex gap-3 p-4 ${n.unread ? "bg-accent/30" : ""}`}>
+                  <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted">
+                    <Icon className="h-4 w-4 text-muted-foreground" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-foreground">{n.title}</p>
+                    <p className="mt-0.5 text-sm text-muted-foreground">{n.body}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{n.time}</p>
+                  </div>
+                  {n.unread ? (
+                    <span className="ml-auto mt-1 h-2 w-2 shrink-0 rounded-full bg-primary" />
+                  ) : null}
                 </div>
-                {n.unread ? (
-                  <span className="ml-auto mt-1 h-2 w-2 shrink-0 rounded-full bg-primary" />
-                ) : null}
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
       </div>
     </AppShell>

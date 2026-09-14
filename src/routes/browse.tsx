@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { ItemCard } from "@/components/ItemCard";
@@ -12,9 +12,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { categories, items, locations } from "@/data/mock";
+import { categories, locations, type MockItem } from "@/data/mock";
+import { supabaseService } from "@/services/supabaseService";
+
+export type BrowseSearch = {
+  q?: string;
+  category?: string;
+  location?: string;
+  type?: string;
+};
 
 export const Route = createFileRoute("/browse")({
+  validateSearch: (search: Record<string, unknown>): BrowseSearch => ({
+    q: (search["q"] as string) || "",
+    category: (search["category"] as string) || "all",
+    location: (search["location"] as string) || "all",
+    type: (search["type"] as string) || "all",
+  }),
   head: () => ({
     meta: [
       { title: "Browse Lost & Found Items — University of Ghana" },
@@ -36,14 +50,20 @@ export const Route = createFileRoute("/browse")({
 });
 
 function Browse() {
-  const [tab, setTab] = useState("all");
-  const [q, setQ] = useState("");
-  const [category, setCategory] = useState("all");
-  const [location, setLocation] = useState("all");
+  const searchParams = Route.useSearch();
+  const [tab, setTab] = useState(searchParams.type || "all");
+  const [q, setQ] = useState(searchParams.q || "");
+  const [category, setCategory] = useState(searchParams.category || "all");
+  const [location, setLocation] = useState(searchParams.location || "all");
+  const [itemList, setItemList] = useState<MockItem[]>([]);
+
+  useEffect(() => {
+    supabaseService.getItems().then(setItemList);
+  }, []);
 
   const results = useMemo(
     () =>
-      items.filter((i) => {
+      itemList.filter((i) => {
         if (tab !== "all" && i.type !== tab) return false;
         if (category !== "all" && i.category !== category) return false;
         if (location !== "all" && i.location !== location) return false;
@@ -53,7 +73,7 @@ function Browse() {
         }
         return true;
       }),
-    [tab, q, category, location],
+    [itemList, tab, q, category, location],
   );
 
   return (

@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, Lock, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
-import { items, verificationQuestions } from "@/data/mock";
+import { verificationQuestions, type MockItem } from "@/data/mock";
+import { supabaseService } from "@/services/supabaseService";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/items/$itemId/claim")({
@@ -23,7 +24,8 @@ export const Route = createFileRoute("/items/$itemId/claim")({
       { property: "og:title", content: "Start an Ownership Claim — UG Lost & Found" },
       {
         property: "og:description",
-        content: "Ownership is confirmed through private verification questions, never public details.",
+        content:
+          "Ownership is confirmed through private verification questions, never public details.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -37,11 +39,30 @@ const steps = ["Verification questions", "Supporting evidence", "Declaration", "
 function ClaimWizard() {
   const { itemId } = Route.useParams();
   const navigate = useNavigate();
-  const item = items.find((i) => i.id === itemId);
+  const [item, setItem] = useState<MockItem | null>(null);
+  const [loading, setLoading] = useState(true);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [evidence, setEvidence] = useState({ proofType: "", details: "" });
   const [agreed, setAgreed] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    supabaseService.getItemById(itemId).then((res) => {
+      setItem(res);
+      setLoading(false);
+    });
+  }, [itemId]);
+
+  if (loading) {
+    return (
+      <AppShell>
+        <div className="mx-auto max-w-3xl px-4 py-16 text-center text-sm text-muted-foreground">
+          Loading item claim details...
+        </div>
+      </AppShell>
+    );
+  }
 
   if (!item) {
     return (
@@ -85,8 +106,8 @@ function ClaimWizard() {
                 <Lock className="h-4 w-4" /> Answers are private
               </p>
               <p className="mt-1.5">
-                These questions come from details the finder recorded privately. Answer from memory —
-                partial answers still count towards your verification score.
+                These questions come from details the finder recorded privately. Answer from memory
+                — partial answers still count towards your verification score.
               </p>
             </div>
 
@@ -167,13 +188,27 @@ function ClaimWizard() {
                 Back
               </Button>
               <Button
-                disabled={!agreed}
-                onClick={() => {
-                  setStep(3);
-                  toast.success("Claim submitted for verification");
+                disabled={!agreed || submitting}
+                onClick={async () => {
+                  setSubmitting(true);
+                  try {
+                    await supabaseService.submitClaim({
+                      itemId: item.id,
+                      itemName: item.name,
+                      claimantName: "Verified Student Claimant",
+                      answers,
+                      evidence,
+                    });
+                    setStep(3);
+                    toast.success("Claim submitted for verification");
+                  } catch (err) {
+                    toast.error("Failed to submit claim. Please try again.");
+                  } finally {
+                    setSubmitting(false);
+                  }
                 }}
               >
-                <ShieldCheck className="mr-2 h-4 w-4" /> Submit claim
+                <ShieldCheck className="mr-2 h-4 w-4" /> {submitting ? "Submitting..." : "Submit claim"}
               </Button>
             </div>
           </section>
